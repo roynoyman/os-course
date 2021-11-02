@@ -50,12 +50,30 @@ void* phys_to_virt(uint64_t phys_addr)
 int main(int argc, char **argv)
 {
 	uint64_t pt = alloc_page_frame();
-
-	assert(page_table_query(pt, 0xcafe) == NO_MAPPING);
-	page_table_update(pt, 0xcafe, 0xf00d);
-	assert(page_table_query(pt, 0xcafe) == 0xf00d);
-	page_table_update(pt, 0xcafe, NO_MAPPING);
-	assert(page_table_query(pt, 0xcafe) == NO_MAPPING);
+    page_table_update(pt, 0xcafe, 0xf00d);
+    printf("2 ok \n");
+    page_table_update(pt, 0xbaff, 0xbadd);
+    printf("3 ok \n");
+    assert(page_table_query(pt, 0xcafe) == 0xf00d);
+    printf("4 ok \n");
+    assert(page_table_query(pt, 0xbaff) == 0xbadd);
+    printf("5 ok \n");
+    page_table_update(pt, 0xbaff, NO_MAPPING);
+    printf("6 ok \n");
+    assert(page_table_query(pt, 0xbaff) == NO_MAPPING);
+    printf("7 ok \n");
+    page_table_update(pt, 0xcafe, 0xbadd);
+    printf("8 ok \n");
+    assert(page_table_query(pt, 0xcafe) == 0xbadd);
+    printf("9 ok \n");
+    page_table_update(pt, 0xcafe, NO_MAPPING);
+    printf("10 ok \n");
+    assert(page_table_query(pt, 0xcafe) == NO_MAPPING);
+    printf("11 ok \n");
+    printf("1st Test: PASSED\n");
+//	assert(page_table_query(pt, 0xcafe) == 0xf00d);
+//	page_table_update(pt, 0xcafe, NO_MAPPING);
+//	assert(page_table_query(pt, 0xcafe) == NO_MAPPING);
 
 	return 0;
 }
