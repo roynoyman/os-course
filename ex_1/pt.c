@@ -1,10 +1,7 @@
-//
-// Created by Roy Noyman on 28/10/2021.
-//
-
 #include "os.h"
 
-int VPN_PARTS_NUMBER = 5;
+// calculation explanation:  ((64-7)-12) / log2(4096/8)
+int VPN_PARTS_NUMBER = 5; //as explained in class
 int MAX_MOVED_BITS = 36;
 
 
