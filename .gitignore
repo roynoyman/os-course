@@ -1,0 +1,7 @@
+# Project exclude paths
+/cmake-build-debug/
+.DS
+
+a.out
+DS
+CMakeLists.txt
