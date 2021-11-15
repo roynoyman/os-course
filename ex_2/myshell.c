@@ -10,6 +10,16 @@
 // Created by Roy Noyman on 11/11/2021.
 //
 // reference - rec3
+int check_wait_status(pid_t pid) {
+    int status, wait_status;
+    wait_status = waitpid(pid, &status,
+                          WUNTRACED); //in order to stop waiting WUNTRACED collect the status of child.
+    if (wait_status < 0) {
+        fprintf(stderr, "ERROR: WAIT FAILURE: %s", errno);
+        return 0;
+    }
+    return wait_status;
+}
 
 void terminate_signal_handler() {
     printf("handling termination signal");
@@ -73,9 +83,10 @@ int exec_with_pipe(char **arglist, int index) {
     char **arglist_part_a = arglist;
     char **arglist_part_b = arglist + index + 1;
     int pipefds[2];
+    int wait_status_1, wait_status_2;
     if (pipe(pipefds) == -1) {
-        perror("ERROR: PIPE FAILURE");
-        exit(0);
+        fprintf(stderr, "ERROR: PIPE FAILURE: %s", errno);
+        return 0;
     }
     int readerfd = pipefds[0];
     int writerfd = pipefds[1];
@@ -87,7 +98,7 @@ int exec_with_pipe(char **arglist, int index) {
         register_signal_handling(5);
         close(readerfd);
         if ((dup2(writerfd, STDOUT_FILENO) == -1) || (errno == EINTR)) {
-            perror("ERROR DUP2 OF PID_1");
+            fprintf(stderr, "ERROR: DUP2 OF PID_1 FAILURE: %s", errno);
             exit(1);
         }
         close(writerfd);
@@ -98,7 +109,7 @@ int exec_with_pipe(char **arglist, int index) {
         register_signal_handling(5);
         close(writerfd);
         if ((dup2(readerfd, STDIN_FILENO) == -1) || (errno == EINTR)) {
-            perror("ERROR DUP2 OF PID_2");
+            fprintf(stderr, "ERROR: DUP2 OF PID_2: %s", errno);
             exit(1);
         }
         close(readerfd);
@@ -108,8 +119,11 @@ int exec_with_pipe(char **arglist, int index) {
     } else {
         close(readerfd);
         close(writerfd);
-        waitpid(pid_1, NULL, WUNTRACED);
-        waitpid(pid_2, NULL, WUNTRACED);
+        wait_status_1 = check_wait_status(pid_1);
+        wait_status_2 = check_wait_status(pid_2);
+        if ((wait_status_1 == 0) || (wait_status_2 == 0)) {
+            return 0;
+        }
         return 1;
     }
 }
@@ -118,6 +132,7 @@ int exec_with_redirecting(char **arglist, int index) {
     int fd = open(arglist[index - 1], O_WRONLY | O_CREAT, O_APPEND);
     arglist[index - 2] = NULL;
     pid_t pid = fork();
+    int wait_status;
     check_fork(pid);
     if (pid == 0) { //child
         if ((dup2(STDOUT_FILENO, fd) == -1) || (errno == EINTR)) {
@@ -129,26 +144,33 @@ int exec_with_redirecting(char **arglist, int index) {
         perror(arglist[0]);
         exit(1);
     } else {
-        waitpid(pid, NULL, WUNTRACED);
+        wait_status = check_wait_status(pid);
+        if(wait_status==0){
+            return 0;
+        }
         close(fd);
+        return 1;
     }
-    return 1;
 }
 
 
 int process_arglist(int count, char **arglist) {
     int special_character_index = contains_special_character_at_index(count, arglist);
+    int wait_status;
     if (special_character_index == 0) { //no special character
         pid_t pid = fork();
         check_fork(pid);
         if (pid == 0) {
             register_signal_handling(5);
             if (execvp(arglist[0], arglist) == -1) {
-                perror("ERROR: EXECVP FAILURE");
-                exit(1);
+                fprintf(stderr, "ERROR: EXECVP FAILURE: %s", errno);
+                return 0;
             }
         } else {
-            waitpid(pid, NULL, WUNTRACED); //in order to stop waiting WUNTRACED collect the status of child.
+            wait_status = check_wait_status(pid);
+            if (wait_status == 0) {
+                return 0;
+            }
             return 1;
         }
     }
@@ -158,15 +180,15 @@ int process_arglist(int count, char **arglist) {
         check_fork(pid);
         if (pid == 0) {
             if (execvp(arglist[0], arglist) == -1) {
-                perror("ERROR: EXECVP FAILURE");
-                exit(1);
+                fprintf(stderr, "ERROR: EXECVP FAILURE: %s", errno);
+                return 0;
             }
         }
         return 1;
     } else if (special_char == 'NULL') { //means '|'
         return exec_with_pipe(arglist, special_character_index);
     } else { //means >
-        exec_with_redirecting(arglist, count);
+        return exec_with_redirecting(arglist, count);
     }
     return 1;
 }
