@@ -184,9 +184,12 @@ int process_arglist(int count, char **arglist) {
     }
     char special_char = *arglist[special_character_index];
     if (special_character_index == count - 1) { // means '&'
+        printf("we are handling & \n");
         pid_t pid = fork();
         check_fork(pid);
         if (pid == 0) {
+            printf("im son proccess\n");
+            printf("%s%d%s%d\n", "pid: ", getpid(), " ppid: ", getppid());
             if (execvp(arglist[0], arglist) == -1) {
                 fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                 return 0;
