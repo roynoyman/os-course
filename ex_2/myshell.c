@@ -177,26 +177,27 @@ int process_arglist(int count, char **arglist) {
             waitpid(pid, NULL, WUNTRACED);
         }
     }
-    char *special_char = arglist[special_character_index];
-    printf("%d\n",special_character_index);
-    if (special_character_index == count - 1) { // means '&'
-        printf("we are handling & \n");
-        pid_t pid = fork();
-        check_fork(pid);
-        if (pid == 0) {
-            printf("im son proccess\n");
-            printf("%s%d%s%d\n", "pid: ", getpid(), " ppid: ", getppid());
-            if (execvp(arglist[0], arglist) == -1) {
-                fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
-                return 0;
+    else {
+        char *special_char = arglist[special_character_index];
+        if (special_character_index == count - 1) { // means '&'
+            printf("we are handling & \n");
+            pid_t pid = fork();
+            check_fork(pid);
+            if (pid == 0) {
+                printf("im son proccess\n");
+                printf("%s%d%s%d\n", "pid: ", getpid(), " ppid: ", getppid());
+                if (execvp(arglist[0], arglist) == -1) {
+                    fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
+                    return 0;
+                }
             }
+        } else if (special_char == '\0') { //means '|'
+            printf("we are handling | \n");
+            exec_with_pipe(arglist, special_character_index);
+        } else { //means >
+            printf("we are handling > \n");
+            exec_with_redirecting(arglist, count);
         }
-    } else if (special_char == '\0') { //means '|'
-        printf("we are handling | \n");
-        exec_with_pipe(arglist, special_character_index);
-    } else { //means >
-        printf("we are handling > \n");
-        exec_with_redirecting(arglist, count);
     }
     return 1;
 }
