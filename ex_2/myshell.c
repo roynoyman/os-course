@@ -5,6 +5,8 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <sys/wait.h>
+#include <stdio.h>
 
 //
 // Created by Roy Noyman on 11/11/2021.
@@ -12,8 +14,7 @@
 // reference - rec3
 int check_wait_status(pid_t pid) {
     int status, wait_status;
-    wait_status = waitpid(pid, &status,
-                          WUNTRACED); //in order to stop waiting WUNTRACED collect the status of child.
+    wait_status = waitpid(pid, &status, WUNTRACED); //in order to stop waiting WUNTRACED collect the status of child.
     if (wait_status < 0) {
         fprintf(stderr, "ERROR: WAIT FAILURE: %s", strerror(errno));
         return 0;
