@@ -87,9 +87,10 @@ int exec_with_pipe(char **arglist, int index) {
             exit(1);
         }
         close(writerfd);
-        execvp(arglist_part_a[0], arglist_part_a);
-        perror(arglist_part_a[0]);
-        exit(1);
+        if (execvp(arglist_part_a[0], arglist_part_a) == -1) {
+            perror(arglist_part_a[0]);
+            exit(1);
+        }
     }
     pid_t pid_2 = fork();
     check_fork(pid_2);
@@ -101,20 +102,21 @@ int exec_with_pipe(char **arglist, int index) {
             exit(1);
         }
         close(readerfd);
-        execvp(arglist_part_b[0], arglist_part_b);
-        perror(arglist_part_b[0]);
-        exit(1);
+        if (execvp(arglist_part_b[0], arglist_part_b)) {
+            perror(arglist_part_b[0]);
+            exit(1);
+        }
     }
     close(readerfd);
     close(writerfd);
     waitpid(pid_1, &status_ptr_1, WUNTRACED);
-    if(WEXITSTATUS(status_ptr_1) != 0){
-        printf("%s%d\n","ERROR: CHILD 1 EXITED WITH STATUS: ", WEXITSTATUS(status_ptr_1));
+    if (WEXITSTATUS(status_ptr_1) != 0) {
+        printf("%s%d\n", "ERROR: CHILD 1 EXITED WITH STATUS: ", WEXITSTATUS(status_ptr_1));
         return 0;
     }
     waitpid(pid_2, &status_ptr_2, WUNTRACED);
-    if(WEXITSTATUS(status_ptr_2) != 0){
-        printf("%s%d\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr_2));
+    if (WEXITSTATUS(status_ptr_2) != 0) {
+        printf("%s%d\n", "ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr_2));
         return 0;
     }
     return 1;
@@ -138,8 +140,8 @@ int exec_with_redirecting(char **arglist, int index) {
     } else {
         close(fd);
         waitpid(pid, &status_ptr, WUNTRACED);
-        if(WEXITSTATUS(status_ptr) != 0){
-            printf("%s%d\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr));
+        if (WEXITSTATUS(status_ptr) != 0) {
+            printf("%s%d\n", "ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr));
             return 0;
         }
         return 1;
@@ -156,14 +158,14 @@ int process_arglist(int count, char **arglist) {
         if (pid == 0) {
             register_signal_handling(5);
             if (execvp(arglist[0], arglist) == -1) {
-                fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
+                perror(arglist[0]);
                 exit(1);
             }
         } else {
             int status_ptr;
             waitpid(pid, &status_ptr, WUNTRACED);
-            if(WEXITSTATUS(status_ptr) != 0){
-                printf("%s%d\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr));
+            if (WEXITSTATUS(status_ptr) != 0) {
+                printf("%s%d\n", "ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr));
                 return 0;
             }
         }
@@ -174,7 +176,7 @@ int process_arglist(int count, char **arglist) {
             check_fork(pid);
             if (pid == 0) {
                 if (execvp(arglist[0], arglist) == -1) {
-                    fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
+                    perror(arglist[0]);
                     exit(1);
                 }
             }
