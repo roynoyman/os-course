@@ -140,11 +140,16 @@ int exec_with_pipe(char **arglist, int index) {
 
 int exec_with_redirecting(char **arglist, int index) {
     int fd = open(arglist[index - 1], O_WRONLY | O_CREAT, O_APPEND);
+    printf("%s\n", arglist[index - 1]);
     arglist[index - 2] = NULL;
+    int i;
+    for (int i = 0; i < index; i++) {
+        printf("%s\n", arglist[i]);
+    }
     pid_t pid = fork();
     check_fork(pid);
     if (pid == 0) { //child
-        if ((dup2(STDOUT_FILENO, fd) == -1) || (errno == EINTR)) {
+        if ((dup2(fd, STDOUT_FILENO) == -1) || (errno == EINTR)) {
             fprintf(stderr, "ERROR: DUP2 OF FD: %s", strerror(errno));
             exit(1);
         }
