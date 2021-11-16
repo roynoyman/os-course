@@ -46,7 +46,6 @@ void register_signal_handling(int signum) {
         new_action.sa_flags = SA_RESTART;
     }
     if (sigaction(signum, &new_action, NULL) == -1) {
-        printf("we got -1 in sigaction - why?");
         perror("ERROR: SIGNAL HANDLER FAILURE ");
         exit(1);
     }
@@ -61,6 +60,7 @@ void check_fork(pid_t pid) {
 
 int prepare(void) {
 //    register_signal_handling(SIGINT);
+    printf("do prepare");
     register_signal_handling(SIGCHLD);
     return 0;
 }
