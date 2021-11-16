@@ -69,7 +69,7 @@ int prepare(void) {
 
 int contains_special_character_at_index(int count, char **arglist) {
     int i;
-    printf("looking for a special cahr &\n");
+    printf("looking for a special char: \n");
     for (i = 0; i < count - 1; i++) {
         if (strcmp(arglist[i], "|") == 0) {
             printf("found |\n");
@@ -106,6 +106,8 @@ int exec_with_pipe(char **arglist, int index) {
     if (pid_1 == 0) {
         register_signal_handling(5);
         close(readerfd);
+        printf("im son proccess num 1\n");
+        printf("%s%d%s%d\n", "pid: ", getpid(), " ppid: ", getppid());
         if ((dup2(writerfd, STDOUT_FILENO) == -1) || (errno == EINTR)) {
             fprintf(stderr, "ERROR: DUP2 OF PID_1 FAILURE: %s", strerror(errno));
             exit(1);
@@ -117,6 +119,8 @@ int exec_with_pipe(char **arglist, int index) {
     } else if (pid_2 == 0) {
         register_signal_handling(5);
         close(writerfd);
+        printf("im son proccess num 2\n");
+        printf("%s%d%s%d\n", "pid: ", getpid(), " ppid: ", getppid());
         if ((dup2(readerfd, STDIN_FILENO) == -1) || (errno == EINTR)) {
             fprintf(stderr, "ERROR: DUP2 OF PID_2: %s", strerror(errno));
             exit(1);
@@ -183,7 +187,6 @@ int process_arglist(int count, char **arglist) {
         }
     }
     char *special_char = arglist[special_character_index];
-    printf("%s\n", special_char);
     if (special_character_index == count - 1) { // means '&'
         printf("we are handling & \n");
         pid_t pid = fork();
@@ -198,8 +201,10 @@ int process_arglist(int count, char **arglist) {
         }
         return 1;
     } else if (special_char == '\0') { //means '|'
+        printf("we are handling | \n");
         return exec_with_pipe(arglist, special_character_index);
     } else { //means >
+        printf("we are handling > \n");
         return exec_with_redirecting(arglist, count);
     }
 }
