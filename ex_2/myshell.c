@@ -168,7 +168,7 @@ int process_arglist(int count, char **arglist) {
     }
     if (special_character_index == 0) { //no special character
         pid_t pid = fork();
-//        check_fork(pid);
+        check_fork(pid);
         if (pid == 0) {
             printf("im son proccess\n");
             printf("%s%d%s%d\n","pid: ",getpid()," ppid: ",getppid());
@@ -182,12 +182,12 @@ int process_arglist(int count, char **arglist) {
                 printf("did execvp \n");
             }
         } else {
-            waitpid(pid,NULL,WUNTRACED);
-            printf("done waiting\n");
-//            wait_status = check_wait_status(pid);
-//            if (wait_status == 0) {
-//                return 0;
-//            }
+//            waitpid(pid,NULL,WUNTRACED);
+//            printf("done waiting\n");
+            wait_status = check_wait_status(pid);
+            if (wait_status == 0) {
+                return 0;
+            }
             return 1;
         }
     }
