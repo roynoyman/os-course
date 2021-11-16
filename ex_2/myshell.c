@@ -88,7 +88,7 @@ int exec_with_pipe(char **arglist, int index) {
         }
         close(writerfd);
         if (execvp(arglist_part_a[0], arglist_part_a) == -1) {
-            perror(arglist_part_a[0]);
+            fprintf(stderr, "ERROR: EXECVP PID_1: %s", arglist_part_a[0]);
             exit(1);
         }
     }
@@ -103,6 +103,7 @@ int exec_with_pipe(char **arglist, int index) {
         }
         close(readerfd);
         if (execvp(arglist_part_b[0], arglist_part_b)) {
+            fprintf(stderr, "ERROR: EXECVP PID_2: %s", arglist_part_b[0]);
             perror(arglist_part_b[0]);
             exit(1);
         }
@@ -133,10 +134,11 @@ int exec_with_redirecting(char **arglist, int index) {
             fprintf(stderr, "ERROR: DUP2 OF FD: %s", strerror(errno));
             exit(1);
         }
-        execvp(arglist[0], arglist);
+        if (execvp(arglist[0], arglist) == -1){
+            fprintf(stderr, "ERROR: EXECVP PID_2: %s", arglist[0]);
+            exit(1);
+        }
         close(fd);
-        perror(arglist[0]);
-        exit(1);
     } else {
         close(fd);
         waitpid(pid, &status_ptr, WUNTRACED);
