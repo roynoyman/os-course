@@ -16,7 +16,7 @@ void terminate_signal_handler() {
     printf("handling termination signal");
 }
 
-void *child_signal_handler() {
+void child_signal_handler() {
     printf("handling child signal\n");
 }
 
@@ -28,7 +28,7 @@ void register_signal_handling(int signum) {
         new_action.sa_sigaction = terminate_signal_handler;
         new_action.sa_flags = SA_RESTART;
     } else if (signum == SIGCHLD) {
-        new_action.sa_sigaction = child_signal_handler;
+        new_action.sa_sigaction = NULL;
         new_action.sa_flags = SA_NOCLDWAIT;
     } else if (signum == 5) { //reset to default for pipe and redirect
         new_action.sa_handler = SIG_DFL;
