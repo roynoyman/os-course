@@ -16,7 +16,7 @@ void terminate_signal_handler() {
     printf("handling termination signal");
 }
 
-void child_signal_handler() {
+void *child_signal_handler() {
     printf("handling child signal\n");
 }
 
