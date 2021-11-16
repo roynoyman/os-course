@@ -162,7 +162,7 @@ int process_arglist(int count, char **arglist) {
     int wait_status;
     if (special_character_index == 0) { //no special character
         pid_t pid = fork();
-        check_fork(pid);
+//        check_fork(pid);
         if (pid == 0) {
             printf("im son proccess\n");
 //            register_signal_handling(5);
@@ -172,10 +172,11 @@ int process_arglist(int count, char **arglist) {
                 return 0;
             }
         } else {
-            wait_status = check_wait_status(pid);
-            if (wait_status == 0) {
-                return 0;
-            }
+            waitpid(pid,NULL,WUNTRACED);
+//            wait_status = check_wait_status(pid);
+//            if (wait_status == 0) {
+//                return 0;
+//            }
             return 1;
         }
     }
