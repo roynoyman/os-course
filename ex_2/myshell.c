@@ -61,7 +61,7 @@ void check_fork(pid_t pid) {
 int prepare(void) {
 //    register_signal_handling(SIGINT);
     printf("do prepare");
-    register_signal_handling(SIGCHLD);
+//    register_signal_handling(SIGCHLD);
     return 0;
 }
 
