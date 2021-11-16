@@ -163,7 +163,8 @@ int process_arglist(int count, char **arglist) {
             int status_ptr;
             waitpid(pid, &status_ptr, WUNTRACED);
             printf("%d\n",WIFEXITED(status_ptr));
-            if(WIFEXITED(status_ptr)){
+            printf("%d\n",WEXITSTATUS(status_ptr));
+            if(WEXITSTATUS(status_ptr) != 0){
                 printf("%s%d\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr));
                 return 0;
             }
