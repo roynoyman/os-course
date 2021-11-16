@@ -171,9 +171,9 @@ int process_arglist(int count, char **arglist) {
 //        check_fork(pid);
         if (pid == 0) {
             printf("im son proccess\n");
-            printf("%s%d%s%d\n","ppid: ",getpid()," ppid: ",getppid());
+            printf("%s%d%s%d\n","pid: ",getpid()," ppid: ",getppid());
 //            register_signal_handling(5);
-            if (execvp(bla[0], bla) == -1) {
+            if (execvp(bla[1], bla) == -1) {
                 printf("execvp problem\n");
                 fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                 return 0;
