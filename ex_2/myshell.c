@@ -161,9 +161,10 @@ int process_arglist(int count, char **arglist) {
     int special_character_index = contains_special_character_at_index(count, arglist);
     int wait_status;
     int i;
+    char **bla = arglist;
     printf("%d\n",count);
     for (i=0; i<count; i++){
-        printf("%s\n",arglist[i]);
+        printf("%s\n",bla[i]);
     }
     if (special_character_index == 0) { //no special character
         pid_t pid = fork();
@@ -171,7 +172,7 @@ int process_arglist(int count, char **arglist) {
         if (pid == 0) {
             printf("im son proccess\n");
 //            register_signal_handling(5);
-            if (execvp(arglist[0], arglist) == -1) {
+            if (execvp(bla[0], bla) == -1) {
                 printf("execvp problem\n");
                 fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                 return 0;
