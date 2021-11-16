@@ -178,6 +178,7 @@ int process_arglist(int count, char **arglist) {
         }
     }
     char *special_char = arglist[special_character_index];
+    printf("%d\n",special_character_index);
     if (special_character_index == count - 1) { // means '&'
         printf("we are handling & \n");
         pid_t pid = fork();
