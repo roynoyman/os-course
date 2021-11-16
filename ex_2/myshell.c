@@ -92,6 +92,7 @@ int exec_with_pipe(char **arglist, int index) {
             exit(1);
         }
     }
+
     pid_t pid_2 = fork();
     check_fork(pid_2);
     if (pid_2 == 0) {
