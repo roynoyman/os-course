@@ -71,16 +71,16 @@ int contains_special_character_at_index(int count, char **arglist) {
     int i;
     printf("looking for a special cahr &\n");
     for (i = 0; i < count - 1; i++) {
-        if (strcmp(arglist[i], "|")) {
+        if (strcmp(arglist[i], "|") == 0) {
             printf("found |\n");
             arglist[i] = NULL;
             return i;
-        } else if (strcmp(arglist[i], ">")) {
+        } else if (strcmp(arglist[i], ">") == 0) {
             printf("found >\n");
             return i;
         }
     }
-    if (strcmp(arglist[count - 1], "&")) {
+    if (strcmp(arglist[count - 1], "&") == 0) {
         printf("found &\n");
         arglist[count - 1] = NULL;
         return count - 1;
@@ -159,11 +159,11 @@ int exec_with_redirecting(char **arglist, int index) {
 int process_arglist(int count, char **arglist) {
     int special_character_index = contains_special_character_at_index(count, arglist);
     int i;
-    char **bla = arglist+1;
+    char **bla = arglist + 1;
     for (i = 0; i < count; i++) {
         printf("%s\n", arglist[i]);
     }
-    printf("%s%d\n","special char is: ",special_character_index);
+    printf("%s%d\n", "special char is: ", special_character_index);
     if (special_character_index == 0) { //no special character
         pid_t pid = fork();
         check_fork(pid);
