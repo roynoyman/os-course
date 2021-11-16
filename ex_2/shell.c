@@ -29,14 +29,14 @@ int main(void)
 			free(line);
 			break;
 		}
-
+    
 		arglist = (char**) malloc(sizeof(char*));
 		if (arglist == NULL) {
 			printf("malloc failed: %s\n", strerror(errno));
 			exit(1);
 		}
 		arglist[0] = strtok(line, " \t\n");
-
+    
 		while (arglist[count] != NULL) {
 			++count;
 			arglist = (char**) realloc(arglist, sizeof(char*) * (count + 1));
