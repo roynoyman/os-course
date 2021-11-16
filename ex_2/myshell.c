@@ -48,9 +48,9 @@ void check_fork(pid_t pid) {
 }
 
 int prepare(void) {
-    register_signal_handling(SIGINT);
-    register_signal_handling(SIGCHLD);
-    printf("done w prepare\n");
+//    register_signal_handling(SIGINT);
+//    register_signal_handling(SIGCHLD);
+//    printf("done w prepare\n");
     return 0;
 }
 
@@ -155,29 +155,21 @@ int exec_with_redirecting(char **arglist, int index) {
 int process_arglist(int count, char **arglist) {
     int special_character_index = contains_special_character_at_index(count, arglist);
     int i;
-    for (i = 0; i < count; i++) {
-        printf("%s\n", arglist[i]);
-    }
     printf("%s%d\n", "special char index is: ", special_character_index);
     if (special_character_index == 0) { //no special character
         pid_t pid = fork();
         check_fork(pid);
         if (pid == 0) {
-            printf("im son proccess\n");
             printf("%s%d%s%d\n", "pid: ", getpid(), " ppid: ", getppid());
             register_signal_handling(5);
             if (execvp(arglist[0], arglist) == -1) {
-                printf("execvp problem\n");
                 fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                 return 0;
-            } else {
-                printf("did execvp \n");
             }
         } else {
             waitpid(pid, NULL, WUNTRACED);
         }
-    }
-    else {
+    } else {
         char *special_char = arglist[special_character_index];
         if (special_character_index == count - 1) { // means '&'
             printf("we are handling & \n");
