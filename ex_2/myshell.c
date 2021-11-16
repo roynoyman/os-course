@@ -16,10 +16,6 @@ void terminate_signal_handler() {
     printf("handling termination signal");
 }
 
-void child_signal_handler() {
-    printf("handling child signal\n");
-}
-
 
 void register_signal_handling(int signum) {
     struct sigaction new_action;
@@ -35,14 +31,14 @@ void register_signal_handling(int signum) {
         new_action.sa_flags = SA_RESTART;
     }
     if (sigaction(signum, &new_action, NULL) == -1) {
-        perror("ERROR: SIGNAL HANDLER FAILURE ");
+        fprintf(stderr, "ERROR: SIGNAL HANDLER FAILURE : %s", strerror(errno));
         exit(1);
     }
 }
 
-void check_fork(pid_t pid) {
+void check_fork(pid_t pid) { //check for error in forks at process_arglist
     if (pid < 0) {
-        perror("ERROR: FORK FAILURE");
+        fprintf(stderr, "ERROR: FORK FAILURE: %s", strerror(errno));
         exit(0);
     }
 }
@@ -55,23 +51,18 @@ int prepare(void) {
 
 int contains_special_character_at_index(int count, char **arglist) {
     int i;
-    printf("looking for a special char: \n");
     for (i = 0; i < count - 1; i++) {
         if (strcmp(arglist[i], "|") == 0) {
-            printf("found |\n");
-            arglist[i] = NULL;
+            arglist[i] = NULL; // to detrmain between | and >
             return i;
         } else if (strcmp(arglist[i], ">") == 0) {
-            printf("found >\n");
             return i;
         }
     }
     if (strcmp(arglist[count - 1], "&") == 0) {
-        printf("found &\n");
         arglist[count - 1] = NULL;
         return count - 1;
     }
-    printf("nothing\n");
     return 0;
 }
 
@@ -79,6 +70,7 @@ int exec_with_pipe(char **arglist, int index) {
     char **arglist_part_a = arglist;
     char **arglist_part_b = arglist + index + 1;
     int pipefds[2];
+    int status_ptr_1, status_ptr_2;
     if (pipe(pipefds) == -1) {
         fprintf(stderr, "ERROR: PIPE FAILURE: %s", strerror(errno));
         return 0;
@@ -90,8 +82,6 @@ int exec_with_pipe(char **arglist, int index) {
     if (pid_1 == 0) {
         register_signal_handling(5);
         close(readerfd);
-        printf("im son proccess num 1\n");
-        printf("%s%d%s%d\n", "pid: ", getpid(), " ppid: ", getppid());
         if ((dup2(writerfd, STDOUT_FILENO) == -1) || (errno == EINTR)) {
             fprintf(stderr, "ERROR: DUP2 OF PID_1 FAILURE: %s", strerror(errno));
             exit(1);
@@ -106,8 +96,6 @@ int exec_with_pipe(char **arglist, int index) {
     if (pid_2 == 0) {
         register_signal_handling(5);
         close(writerfd);
-        printf("im son proccess num 2 \n");
-        printf("%s%d%s%d\n", "pid: ", getpid(), " ppid: ", getppid());
         if ((dup2(readerfd, STDIN_FILENO) == -1) || (errno == EINTR)) {
             fprintf(stderr, "ERROR: DUP2 OF PID_2: %s", strerror(errno));
             exit(1);
@@ -119,19 +107,23 @@ int exec_with_pipe(char **arglist, int index) {
     }
     close(readerfd);
     close(writerfd);
-    waitpid(pid_1, NULL, WUNTRACED);
-    waitpid(pid_2, NULL, WUNTRACED);
+    waitpid(pid_1, &status_ptr_1, WUNTRACED);
+    if(WIFEXITED(status_ptr_1)){
+        printf("%S%D\n","ERROR: CHILD 1 EXITED WITH STATUS: ", WEXITSTATUS(status_ptr_1));
+        return 0;
+    }
+    waitpid(pid_2, &status_ptr_2, WUNTRACED);
+    if(WIFEXITED(status_ptr_2)){
+        printf("%S%D\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr_2));
+        return 0;
+    }
     return 1;
 }
 
 int exec_with_redirecting(char **arglist, int index) {
+    int status_ptr;
     int fd = open(arglist[index - 1], O_CREAT | O_WRONLY | O_TRUNC, 0777);
-    printf("%s\n", arglist[index - 1]);
     arglist[index - 2] = NULL;
-    int i;
-    for (i = 0; i < index; i++) {
-        printf("%s\n", arglist[i]);
-    }
     pid_t pid = fork();
     check_fork(pid);
     if (pid == 0) { //child
@@ -145,7 +137,11 @@ int exec_with_redirecting(char **arglist, int index) {
         exit(1);
     } else {
         close(fd);
-        waitpid(pid, NULL, WUNTRACED);
+        waitpid(pid, &status_ptr, WUNTRACED);
+        if(WIFEXITED(status_ptr)){
+            printf("%S%D\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr));
+            return 0;
+        }
         return 1;
     }
 }
@@ -153,39 +149,38 @@ int exec_with_redirecting(char **arglist, int index) {
 
 int process_arglist(int count, char **arglist) {
     int special_character_index = contains_special_character_at_index(count, arglist);
-    printf("%s%d\n", "special char index is: ", special_character_index);
-    if (special_character_index == 0) { //no special character
+    if (special_character_index == 0) { // no special character
+
         pid_t pid = fork();
         check_fork(pid);
         if (pid == 0) {
-            printf("%s%d%s%d\n", "pid: ", getpid(), " ppid: ", getppid());
             register_signal_handling(5);
             if (execvp(arglist[0], arglist) == -1) {
                 fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                 exit(1);
             }
         } else {
-            waitpid(pid, NULL, WUNTRACED);
+            int status_ptr;
+            waitpid(pid, &status_ptr, WUNTRACED);
+            if(WIFEXITED(status_ptr)){
+                printf("%S%D\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr));
+                return 0;
+            }
         }
-    } else {
+    } else { // there's special character
         char *special_char = arglist[special_character_index];
         if (special_character_index == count - 1) { // means '&'
-            printf("we are handling & \n");
             pid_t pid = fork();
             check_fork(pid);
             if (pid == 0) {
-                printf("im son proccess\n");
-                printf("%s%d%s%d\n", "pid: ", getpid(), " ppid: ", getppid());
                 if (execvp(arglist[0], arglist) == -1) {
                     fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                     exit(1);
                 }
             }
         } else if (special_char == '\0') { //means '|'
-            printf("we are handling | \n");
             exec_with_pipe(arglist, special_character_index);
         } else { //means >
-            printf("we are handling > \n");
             exec_with_redirecting(arglist, count);
         }
     }
