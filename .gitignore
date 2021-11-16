@@ -1,9 +1,12 @@
 # Project exclude paths
 /cmake-build-debug/
 .DS
-
+.DS_Store
 a.out
 DS
+CMakeLists.txt
+
 .CMakeLists.txt
+..CMakeLists.txt
 recitations_code
 ex_2/ex2_tester.pdf
