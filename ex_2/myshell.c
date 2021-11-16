@@ -15,7 +15,7 @@
 int check_wait_status(pid_t pid) {
     int status, wait_status;
     wait_status = waitpid(pid, &status, WUNTRACED); //in order to stop waiting WUNTRACED collect the status of child.
-    printf("%d",wait_status);
+    printf("%d\n",wait_status);
     if (wait_status < 0) {
         fprintf(stderr, "ERROR: WAIT FAILURE: %s", strerror(errno));
         return 0;
@@ -173,7 +173,6 @@ int process_arglist(int count, char **arglist) {
             }
         } else {
             wait_status = check_wait_status(pid);
-            printf("%s%d","in dad: wait status is ",wait_status);
             if (wait_status == 0) {
                 return 0;
             }
