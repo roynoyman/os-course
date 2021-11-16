@@ -166,14 +166,18 @@ int process_arglist(int count, char **arglist) {
         if (pid == 0) {
             printf("im son proccess\n");
 //            register_signal_handling(5);
-            printf("%s\n",arglist[0]);
+            printf("%s\n",arglist[1]);
             if (execvp(arglist[0], arglist) == -1) {
                 printf("execvp problem\n");
                 fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                 return 0;
             }
+            else{
+                printf("did execvp \n");
+            }
         } else {
             waitpid(pid,NULL,WUNTRACED);
+            printf("done waiting\n");
 //            wait_status = check_wait_status(pid);
 //            if (wait_status == 0) {
 //                return 0;
