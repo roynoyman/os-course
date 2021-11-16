@@ -109,12 +109,12 @@ int exec_with_pipe(char **arglist, int index) {
     close(writerfd);
     waitpid(pid_1, &status_ptr_1, WUNTRACED);
     if(WIFEXITED(status_ptr_1)){
-        printf("%S%D\n","ERROR: CHILD 1 EXITED WITH STATUS: ", WEXITSTATUS(status_ptr_1));
+        printf("%s%d\n","ERROR: CHILD 1 EXITED WITH STATUS: ", WEXITSTATUS(status_ptr_1));
         return 0;
     }
     waitpid(pid_2, &status_ptr_2, WUNTRACED);
     if(WIFEXITED(status_ptr_2)){
-        printf("%S%D\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr_2));
+        printf("%s%d\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr_2));
         return 0;
     }
     return 1;
@@ -139,7 +139,7 @@ int exec_with_redirecting(char **arglist, int index) {
         close(fd);
         waitpid(pid, &status_ptr, WUNTRACED);
         if(WIFEXITED(status_ptr)){
-            printf("%S%D\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr));
+            printf("%s%d\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr));
             return 0;
         }
         return 1;
@@ -163,7 +163,7 @@ int process_arglist(int count, char **arglist) {
             int status_ptr;
             waitpid(pid, &status_ptr, WUNTRACED);
             if(WIFEXITED(status_ptr)){
-                printf("%S%D\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr));
+                printf("%s%d\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr));
                 return 0;
             }
         }
