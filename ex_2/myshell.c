@@ -189,6 +189,7 @@ int process_arglist(int count, char **arglist) {
             exec_with_redirecting(arglist, count);
         }
     }
+
     return 1;
 }
 
