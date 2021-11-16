@@ -69,18 +69,23 @@ int prepare(void) {
 
 int contains_special_character_at_index(int count, char **arglist) {
     int i;
+    printf("looking for a special cahr &\n");
     for (i = 0; i < count - 1; i++) {
         if (strcmp(arglist[i], "|")) {
+            printf("found |\n");
             arglist[i] = NULL;
             return i;
         } else if (strcmp(arglist[i], ">")) {
+            printf("found >\n");
             return i;
         }
     }
     if (strcmp(arglist[count - 1], "&")) {
+        printf("found &\n");
         arglist[count - 1] = NULL;
         return count - 1;
     }
+    printf("nothing\n");
     return 0;
 }
 
