@@ -12,8 +12,9 @@
 // Created by Roy Noyman on 11/11/2021.
 //
 // reference - rec3
-int check_wait_status(pid_t pid) {
-    waitpid(pid,NULL,WUNTRACED);
+void check_wait_status(pid_t pid) {
+    waitpid(pid, NULL, WUNTRACED);
+
 //    int status, wait_status;
 //    wait_status = waitpid(pid, &status, WUNTRACED); //in order to stop waiting WUNTRACED collect the status of child.
 //    printf("%d\n",wait_status);
@@ -123,11 +124,8 @@ int exec_with_pipe(char **arglist, int index) {
     } else {
         close(readerfd);
         close(writerfd);
-        wait_status_1 = check_wait_status(pid_1);
-        wait_status_2 = check_wait_status(pid_2);
-        if ((wait_status_1 == 0) || (wait_status_2 == 0)) {
-            return 0;
-        }
+        waitpid(pid_1, NULL, WUNTRACED);
+        waitpid(pid_2, NULL, WUNTRACED);
         return 1;
     }
 }
@@ -148,11 +146,8 @@ int exec_with_redirecting(char **arglist, int index) {
         perror(arglist[0]);
         exit(1);
     } else {
-        wait_status = check_wait_status(pid);
-        if (wait_status == 0) {
-            return 0;
-        }
         close(fd);
+        waitpid(pid, NULL, WUNTRACED);
         return 1;
     }
 }
@@ -160,26 +155,23 @@ int exec_with_redirecting(char **arglist, int index) {
 
 int process_arglist(int count, char **arglist) {
     int special_character_index = contains_special_character_at_index(count, arglist);
-    int wait_status;
     int i;
-    char **bla = arglist;
-    printf("%d\n",count);
-    for (i=0; i<count; i++){
-        printf("%s\n",bla[i]);
+    char **bla = arglist+1;
+    for (i = 0; i < count; i++) {
+        printf("%s\n", arglist[i]);
     }
     if (special_character_index == 0) { //no special character
         pid_t pid = fork();
         check_fork(pid);
         if (pid == 0) {
             printf("im son proccess\n");
-            printf("%s%d%s%d\n","pid: ",getpid()," ppid: ",getppid());
+            printf("%s%d%s%d\n", "pid: ", getpid(), " ppid: ", getppid());
             register_signal_handling(5);
-            if (execvp(bla[1], bla+1) == -1) {
+            if (execvp(arglist[1], arglist + 1) == -1) {
                 printf("execvp problem\n");
                 fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                 return 0;
-            }
-            else{
+            } else {
                 printf("did execvp \n");
             }
         } else {
@@ -192,16 +184,16 @@ int process_arglist(int count, char **arglist) {
         pid_t pid = fork();
         check_fork(pid);
         if (pid == 0) {
-            if (execvp(arglist[0], arglist) == -1) {
+            if (execvp(bla[0], bla) == -1) {
                 fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                 return 0;
             }
         }
         return 1;
     } else if (special_char == '\0') { //means '|'
-        return exec_with_pipe(arglist, special_character_index);
+        return exec_with_pipe(bla, special_character_index);
     } else { //means >
-        return exec_with_redirecting(arglist, count);
+        return exec_with_redirecting(bla, count);
     }
 }
 
