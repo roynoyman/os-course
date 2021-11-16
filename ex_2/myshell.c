@@ -48,9 +48,8 @@ void check_fork(pid_t pid) {
 }
 
 int prepare(void) {
-//    register_signal_handling(SIGINT);
+    register_signal_handling(SIGINT);
     register_signal_handling(SIGCHLD);
-//    printf("done w prepare\n");
     return 0;
 }
 
@@ -154,7 +153,6 @@ int exec_with_redirecting(char **arglist, int index) {
 
 int process_arglist(int count, char **arglist) {
     int special_character_index = contains_special_character_at_index(count, arglist);
-    int i;
     printf("%s%d\n", "special char index is: ", special_character_index);
     if (special_character_index == 0) { //no special character
         pid_t pid = fork();
