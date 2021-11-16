@@ -46,6 +46,7 @@ void register_signal_handling(int signum) {
         new_action.sa_flags = SA_RESTART;
     }
     if (sigaction(signum, &new_action, NULL) == -1) {
+        printf("we got -1 in sigaction - why?");
         perror("ERROR: SIGNAL HANDLER FAILURE ");
         exit(1);
     }
@@ -160,10 +161,8 @@ int process_arglist(int count, char **arglist) {
     int special_character_index = contains_special_character_at_index(count, arglist);
     int wait_status;
     if (special_character_index == 0) { //no special character
-        printf("no special char\n");
         pid_t pid = fork();
         check_fork(pid);
-        printf("good fork\n");
         if (pid == 0) {
             printf("im son proccess\n");
             register_signal_handling(5);
@@ -174,7 +173,7 @@ int process_arglist(int count, char **arglist) {
             }
         } else {
             wait_status = check_wait_status(pid);
-            printf("%s%s","in dad: wait status is ",wait_status);
+            printf("%s%d","in dad: wait status is ",wait_status);
             if (wait_status == 0) {
                 return 0;
             }
