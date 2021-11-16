@@ -60,7 +60,7 @@ void check_fork(pid_t pid) {
 
 int prepare(void) {
 //    register_signal_handling(SIGINT);
-    printf("do prepare");
+    printf("do prepare\n");
 //    register_signal_handling(SIGCHLD);
     return 0;
 }
@@ -171,6 +171,7 @@ int process_arglist(int count, char **arglist) {
 //        check_fork(pid);
         if (pid == 0) {
             printf("im son proccess\n");
+            printf("%s%d%s%d\n","ppid: ",getpid()," ppid: ",getppid())
 //            register_signal_handling(5);
             if (execvp(bla[0], bla) == -1) {
                 printf("execvp problem\n");
