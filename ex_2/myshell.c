@@ -186,7 +186,7 @@ int process_arglist(int count, char **arglist) {
 //            waitpid(pid,NULL,WUNTRACED);
 //            printf("done waiting\n");
             wait_status = check_wait_status(pid);
-            printf(wait_status);
+            printf("%d\n",wait_status);
             if (wait_status == 0) {
                 return 0;
             }
