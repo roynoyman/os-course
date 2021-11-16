@@ -188,7 +188,6 @@ int process_arglist(int count, char **arglist) {
             }
         } else {
             waitpid(pid, NULL, WUNTRACED);
-            return 1;
         }
     }
     char *special_char = arglist[special_character_index];
@@ -204,14 +203,14 @@ int process_arglist(int count, char **arglist) {
                 return 0;
             }
         }
-        return 1;
     } else if (special_char == '\0') { //means '|'
         printf("we are handling | \n");
-        return exec_with_pipe(arglist, special_character_index);
+        exec_with_pipe(arglist, special_character_index);
     } else { //means >
         printf("we are handling > \n");
-        return exec_with_redirecting(arglist, count);
+        exec_with_redirecting(arglist, count);
     }
+    return 1;
 }
 
 int finalize() {
