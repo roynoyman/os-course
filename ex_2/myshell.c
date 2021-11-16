@@ -125,7 +125,7 @@ int exec_with_pipe(char **arglist, int index) {
 }
 
 int exec_with_redirecting(char **arglist, int index) {
-    int fd = open(arglist[index - 1], 0777);
+    int fd = creat(arglist[index - 1], 0777);
     printf("%s\n", arglist[index - 1]);
     arglist[index - 2] = NULL;
     int i;
