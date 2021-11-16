@@ -13,7 +13,7 @@
 //
 // reference - rec3
 int check_wait_status(pid_t pid) {
-    return waitpid(pid,NULL,WUNTRACED);
+    waitpid(pid,NULL,WUNTRACED);
 //    int status, wait_status;
 //    wait_status = waitpid(pid, &status, WUNTRACED); //in order to stop waiting WUNTRACED collect the status of child.
 //    printf("%d\n",wait_status);
@@ -183,13 +183,7 @@ int process_arglist(int count, char **arglist) {
                 printf("did execvp \n");
             }
         } else {
-//            waitpid(pid,NULL,WUNTRACED);
-//            printf("done waiting\n");
-            wait_status = check_wait_status(pid);
-            printf("%d\n",wait_status);
-            if (wait_status == 0) {
-                return 0;
-            }
+            waitpid(pid, NULL, WUNTRACED);
             return 1;
         }
     }
