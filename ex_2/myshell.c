@@ -162,7 +162,7 @@ int process_arglist(int count, char **arglist) {
     for (i = 0; i < count; i++) {
         printf("%s\n", arglist[i]);
     }
-    printf("%s%d\n", "special char is: ", special_character_index);
+    printf("%s%d\n", "special char index is: ", special_character_index);
     if (special_character_index == 0) { //no special character
         pid_t pid = fork();
         check_fork(pid);
@@ -182,7 +182,8 @@ int process_arglist(int count, char **arglist) {
             return 1;
         }
     }
-    char special_char = *arglist[special_character_index];
+    char *special_char = arglist[special_character_index];
+    printf("%s\n", special_char);
     if (special_character_index == count - 1) { // means '&'
         printf("we are handling & \n");
         pid_t pid = fork();
