@@ -108,12 +108,12 @@ int exec_with_pipe(char **arglist, int index) {
     close(readerfd);
     close(writerfd);
     waitpid(pid_1, &status_ptr_1, WUNTRACED);
-    if(WEXITSTATUS(status_ptr) != 0){
+    if(WEXITSTATUS(status_ptr_1) != 0){
         printf("%s%d\n","ERROR: CHILD 1 EXITED WITH STATUS: ", WEXITSTATUS(status_ptr_1));
         return 0;
     }
     waitpid(pid_2, &status_ptr_2, WUNTRACED);
-    if(WEXITSTATUS(status_ptr) != 0){
+    if(WEXITSTATUS(status_ptr_2) != 0){
         printf("%s%d\n","ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr_2));
         return 0;
     }
