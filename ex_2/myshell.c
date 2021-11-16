@@ -15,6 +15,7 @@
 int check_wait_status(pid_t pid) {
     int status, wait_status;
     wait_status = waitpid(pid, &status, WUNTRACED); //in order to stop waiting WUNTRACED collect the status of child.
+    printf("%d",wait_status);
     if (wait_status < 0) {
         fprintf(stderr, "ERROR: WAIT FAILURE: %s", strerror(errno));
         return 0;
@@ -27,7 +28,7 @@ void terminate_signal_handler() {
 }
 
 void child_signal_handler() {
-    printf("handling child signal");
+    printf("handling child signal\n");
 }
 
 
@@ -159,16 +160,21 @@ int process_arglist(int count, char **arglist) {
     int special_character_index = contains_special_character_at_index(count, arglist);
     int wait_status;
     if (special_character_index == 0) { //no special character
+        printf("no special char\n");
         pid_t pid = fork();
         check_fork(pid);
+        printf("good fork\n");
         if (pid == 0) {
+            printf("im son proccess\n");
             register_signal_handling(5);
             if (execvp(arglist[0], arglist) == -1) {
+                printf("execvp problem\n");
                 fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                 return 0;
             }
         } else {
             wait_status = check_wait_status(pid);
+            printf("%s%s","in dad: wait status is ",wait_status);
             if (wait_status == 0) {
                 return 0;
             }
