@@ -12,19 +12,6 @@
 // Created by Roy Noyman on 11/11/2021.
 //
 // reference - rec3
-void check_wait_status(pid_t pid) {
-    waitpid(pid, NULL, WUNTRACED);
-
-//    int status, wait_status;
-//    wait_status = waitpid(pid, &status, WUNTRACED); //in order to stop waiting WUNTRACED collect the status of child.
-//    printf("%d\n",wait_status);
-//    if (wait_status < 0) {
-//        fprintf(stderr, "ERROR: WAIT FAILURE: %s", strerror(errno));
-//        return 0;
-//    }
-//    return wait_status;
-}
-
 void terminate_signal_handler() {
     printf("handling termination signal");
 }
@@ -61,7 +48,7 @@ void check_fork(pid_t pid) {
 }
 
 int prepare(void) {
-//    register_signal_handling(SIGINT);
+    register_signal_handling(SIGINT);
     register_signal_handling(SIGCHLD);
     printf("done w prepare\n");
     return 0;
@@ -143,7 +130,7 @@ int exec_with_redirecting(char **arglist, int index) {
     printf("%s\n", arglist[index - 1]);
     arglist[index - 2] = NULL;
     int i;
-    for (int i = 0; i < index; i++) {
+    for (i = 0; i < index; i++) {
         printf("%s\n", arglist[i]);
     }
     pid_t pid = fork();
