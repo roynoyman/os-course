@@ -134,7 +134,7 @@ int exec_with_redirecting(char **arglist, int index) {
             fprintf(stderr, "ERROR: DUP2 OF FD: %s", strerror(errno));
             exit(1);
         }
-        if (execvp(arglist[0], arglist) == -1){
+        if (execvp(arglist[0], arglist) == -1) {
             fprintf(stderr, "ERROR: EXECVP PID_2: %s", arglist[0]);
             exit(1);
         }
@@ -146,8 +146,8 @@ int exec_with_redirecting(char **arglist, int index) {
             printf("%s%d\n", "ERROR: CHILD EXITED WITH STATUS: ", WEXITSTATUS(status_ptr));
             return 0;
         }
-        return 1;
     }
+    return 1;
 }
 
 
