@@ -88,7 +88,6 @@ int exec_with_pipe(char **arglist, int index) {
     char **arglist_part_a = arglist;
     char **arglist_part_b = arglist + index + 1;
     int pipefds[2];
-    int wait_status_1, wait_status_2;
     if (pipe(pipefds) == -1) {
         fprintf(stderr, "ERROR: PIPE FAILURE: %s", strerror(errno));
         return 0;
@@ -134,7 +133,6 @@ int exec_with_redirecting(char **arglist, int index) {
     int fd = open(arglist[index - 1], O_WRONLY | O_CREAT, O_APPEND);
     arglist[index - 2] = NULL;
     pid_t pid = fork();
-    int wait_status;
     check_fork(pid);
     if (pid == 0) { //child
         if ((dup2(STDOUT_FILENO, fd) == -1) || (errno == EINTR)) {
@@ -160,6 +158,7 @@ int process_arglist(int count, char **arglist) {
     for (i = 0; i < count; i++) {
         printf("%s\n", arglist[i]);
     }
+    printf("%s%d\n","special char is: ",special_character_index);
     if (special_character_index == 0) { //no special character
         pid_t pid = fork();
         check_fork(pid);
