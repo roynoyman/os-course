@@ -57,7 +57,7 @@ void check_fork(pid_t pid) {
 }
 
 int prepare(void) {
-    register_signal_handling(SIGINT);
+//    register_signal_handling(SIGINT);
     register_signal_handling(SIGCHLD);
     return 0;
 }
@@ -145,7 +145,7 @@ int exec_with_redirecting(char **arglist, int index) {
         exit(1);
     } else {
         wait_status = check_wait_status(pid);
-        if(wait_status==0){
+        if (wait_status == 0) {
             return 0;
         }
         close(fd);
