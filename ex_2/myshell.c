@@ -103,10 +103,10 @@ int exec_with_pipe(char **arglist, int index) {
             exit(1);
         }
         close(readerfd);
-        if (execvp(arglist_part_b[0], arglist_part_b)) {
-            perror(arglist_part_b[0]);
-            exit(1);
-        }
+        execvp(arglist_part_b[0], arglist_part_b);
+        perror(arglist_part_b[0]);
+        exit(1);
+
     }
     close(readerfd);
     close(writerfd);
