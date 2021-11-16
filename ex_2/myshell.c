@@ -128,7 +128,7 @@ int exec_with_pipe(char **arglist, int index) {
         }
         close(readerfd);
         execvp(arglist_part_b[0], arglist_part_b);
-        perror(arglist[0]);
+        perror(arglist_part_b[0]);
         exit(1);
     }
     close(readerfd);
@@ -136,7 +136,6 @@ int exec_with_pipe(char **arglist, int index) {
     waitpid(pid_1, NULL, WUNTRACED);
     waitpid(pid_2, NULL, WUNTRACED);
     return 1;
-
 }
 
 int exec_with_redirecting(char **arglist, int index) {
