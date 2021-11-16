@@ -116,10 +116,11 @@ int exec_with_pipe(char **arglist, int index) {
         execvp(arglist_part_a[0], arglist_part_a);
         perror(arglist_part_a[0]);
         exit(1);
-    } else if (pid_2 == 0) {
+    }
+    if (pid_2 == 0) {
         register_signal_handling(5);
         close(writerfd);
-        printf("im son proccess num 2\n");
+        printf("im son proccess num 2 \n");
         printf("%s%d%s%d\n", "pid: ", getpid(), " ppid: ", getppid());
         if ((dup2(readerfd, STDIN_FILENO) == -1) || (errno == EINTR)) {
             fprintf(stderr, "ERROR: DUP2 OF PID_2: %s", strerror(errno));
@@ -129,13 +130,13 @@ int exec_with_pipe(char **arglist, int index) {
         execvp(arglist_part_b[0], arglist_part_b);
         perror(arglist[0]);
         exit(1);
-    } else {
-        close(readerfd);
-        close(writerfd);
-        waitpid(pid_1, NULL, WUNTRACED);
-        waitpid(pid_2, NULL, WUNTRACED);
-        return 1;
     }
+    close(readerfd);
+    close(writerfd);
+    waitpid(pid_1, NULL, WUNTRACED);
+    waitpid(pid_2, NULL, WUNTRACED);
+    return 1;
+
 }
 
 int exec_with_redirecting(char **arglist, int index) {
