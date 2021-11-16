@@ -162,7 +162,7 @@ int process_arglist(int count, char **arglist) {
             register_signal_handling(5);
             if (execvp(arglist[0], arglist) == -1) {
                 fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
-                return 0;
+                exit(1);
             }
         } else {
             waitpid(pid, NULL, WUNTRACED);
@@ -178,7 +178,7 @@ int process_arglist(int count, char **arglist) {
                 printf("%s%d%s%d\n", "pid: ", getpid(), " ppid: ", getppid());
                 if (execvp(arglist[0], arglist) == -1) {
                     fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
-                    return 0;
+                    exit(1);
                 }
             }
         } else if (special_char == '\0') { //means '|'
