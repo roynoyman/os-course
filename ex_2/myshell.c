@@ -101,8 +101,6 @@ int exec_with_pipe(char **arglist, int index) {
     int writerfd = pipefds[1];
     pid_t pid_1 = fork();
     check_fork(pid_1);
-    pid_t pid_2 = fork();
-    check_fork(pid_2);
     if (pid_1 == 0) {
         register_signal_handling(5);
         close(readerfd);
@@ -117,6 +115,8 @@ int exec_with_pipe(char **arglist, int index) {
         perror(arglist_part_a[0]);
         exit(1);
     }
+    pid_t pid_2 = fork();
+    check_fork(pid_2);
     if (pid_2 == 0) {
         register_signal_handling(5);
         close(writerfd);
