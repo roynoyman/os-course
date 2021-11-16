@@ -13,14 +13,15 @@
 //
 // reference - rec3
 int check_wait_status(pid_t pid) {
-    int status, wait_status;
-    wait_status = waitpid(pid, &status, WUNTRACED); //in order to stop waiting WUNTRACED collect the status of child.
-    printf("%d\n",wait_status);
-    if (wait_status < 0) {
-        fprintf(stderr, "ERROR: WAIT FAILURE: %s", strerror(errno));
-        return 0;
-    }
-    return wait_status;
+    return waitpid(pid,NULL,WUNTRACED);
+//    int status, wait_status;
+//    wait_status = waitpid(pid, &status, WUNTRACED); //in order to stop waiting WUNTRACED collect the status of child.
+//    printf("%d\n",wait_status);
+//    if (wait_status < 0) {
+//        fprintf(stderr, "ERROR: WAIT FAILURE: %s", strerror(errno));
+//        return 0;
+//    }
+//    return wait_status;
 }
 
 void terminate_signal_handler() {
@@ -185,6 +186,7 @@ int process_arglist(int count, char **arglist) {
 //            waitpid(pid,NULL,WUNTRACED);
 //            printf("done waiting\n");
             wait_status = check_wait_status(pid);
+            printf(wait_status);
             if (wait_status == 0) {
                 return 0;
             }
