@@ -12,7 +12,7 @@
 // Created by Roy Noyman on 11/11/2021.
 //
 // reference - rec3
-void terminate_signal_handler() {
+void terminate_signal_handler(int signum) {
     printf("handling termination signal\n");
 }
 
@@ -21,7 +21,7 @@ int register_signal_handling(int signum) {
     memset(&new_action, 0, sizeof(new_action));
     if (signum == SIGINT) {
         printf("we are building sigint sig handler\n");
-        new_action.sa_handler = SIG_IGN;
+        new_action.sa_handler = terminate_signal_handler;
         new_action.sa_flags = SA_RESTART; //Deal with EINTER
     } else if (signum == SIGCHLD) {
         printf("we are building SIGCHLD sig handler\n");
