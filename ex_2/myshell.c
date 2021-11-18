@@ -31,12 +31,11 @@ int register_signal_handling(int signum) {
         printf("we are building DEFAULT sig handler\n");
         new_action.sa_handler = SIG_DFL;
         new_action.sa_flags = SA_RESTART; //Deal with EINTER
-        return sigaction(SIGINT, &new_action, NULL);
     }
-//    if (sigaction(signum, &new_action, NULL) == -1) {
-//        fprintf(stderr, "ERROR: SIGNAL HANDLER FAILURE : %s", strerror(errno));
-//        exit(1);
-//    }
+    if (sigaction(signum, &new_action, NULL) == -1) {
+        fprintf(stderr, "ERROR: SIGNAL HANDLER FAILURE : %s", strerror(errno));
+        exit(1);
+    }
     return sigaction(signum, &new_action, NULL);
 }
 
@@ -126,7 +125,6 @@ int exec_with_redirecting(char **arglist, int index) {
             exit(1);
         }
         execvp(arglist[0], arglist);
-        close(fd);
         perror(arglist[0]);
         exit(1);
     } else {
@@ -157,7 +155,6 @@ int process_arglist(int count, char **arglist) {
             pid_t pid = fork();
             check_fork(pid);
             if (pid == 0) {
-                register_signal_handling(SIGINT);
                 printf("forked process in a &  %d %s %d", getpid(), "parent", getppid());
                 if (execvp(arglist[0], arglist) == -1) {
                     fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
