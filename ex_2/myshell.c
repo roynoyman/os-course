@@ -13,26 +13,27 @@
 //
 // reference - rec3
 void terminate_signal_handler() {
-    printf("handling termination signal");
+    printf("handling termination signal\n");
 }
 
-void register_signal_handling(int signum) {
+int register_signal_handling(int signum) {
     struct sigaction new_action;
     memset(&new_action, 0, sizeof(new_action));
     if (signum == SIGINT) {
         new_action.sa_sigaction = terminate_signal_handler;
-        new_action.sa_flags = SA_RESTART;
+        new_action.sa_flags = SA_RESTART; //Deal with EINTER
     } else if (signum == SIGCHLD) {
         new_action.sa_sigaction = NULL;
-        new_action.sa_flags = SA_NOCLDWAIT;
+        new_action.sa_flags = SA_NOCLDWAIT; //Do no transform children into zombies
     } else if (signum == 5) { //reset to default for pipe and redirect
         new_action.sa_handler = SIG_DFL;
-        new_action.sa_flags = SA_RESTART;
+        new_action.sa_flags = SA_RESTART; //Deal with EINTER
     }
     if (sigaction(signum, &new_action, NULL) == -1) {
         fprintf(stderr, "ERROR: SIGNAL HANDLER FAILURE : %s", strerror(errno));
         exit(1);
     }
+    return sigaction(signum, &new_action, NULL);
 }
 
 void check_fork(pid_t pid) { //check for error in forks at process_arglist
