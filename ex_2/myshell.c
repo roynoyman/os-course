@@ -23,6 +23,7 @@ int register_signal_handling(int signum) {
         printf("we are building sigint sig handler\n");
         new_action.sa_handler = terminate_signal_handler;
         new_action.sa_flags = SA_RESTART; //Deal with EINTER
+        return (SIGINT, &new_action, NULL);
     } else if (signum == SIGCHLD) {
         printf("we are building SIGCHLD sig handler\n");
         new_action.sa_sigaction = NULL;
