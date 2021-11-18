@@ -151,14 +151,20 @@ int process_arglist(int count, char **arglist) {
     } else { // there's special character
         char *special_char = arglist[special_character_index];
         if (special_character_index == count - 1) { // means '&'
+            printf("we are in &");
             pid_t pid = fork();
             check_fork(pid);
             if (pid == 0) {
-                register_signal_handling(2);
+                printf("forked process in a &: %d%s%d",getpid(),"parent",getppid());
+                register_signal_handling(SIGINT);
                 if (execvp(arglist[0], arglist) == -1) {
                     fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                     exit(1);
                 }
+            }
+            else{
+                printf("parent process in a &: %d",getpid());
+                register_signal_handling(SIGINT);
             }
         } else if (special_char == '\0') { //means '|'
             exec_with_pipe(arglist, special_character_index);
