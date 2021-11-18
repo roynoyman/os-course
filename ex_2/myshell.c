@@ -159,6 +159,7 @@ int process_arglist(int count, char **arglist) {
             if (pid == 0) {
                 printf("forked process in a &  %d %s %d", getpid(), "parent", getppid());
                 if (execvp(arglist[0], arglist) == -1) {
+                    register_signal_handling(SIGINT);
                     fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                     exit(1);
                 }
