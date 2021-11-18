@@ -158,7 +158,7 @@ int process_arglist(int count, char **arglist) {
             pid_t pid = fork();
             printf("pid in parent is: %d\n", pid);
             check_fork(pid);
-            if (pid == 0) {
+            if (pid >= 0) {
                 printf("forked process in a &: %d%s%d", getpid(), "parent", getppid());
                 register_signal_handling(SIGINT);
                 if (execvp(arglist[0], arglist) == -1) {
