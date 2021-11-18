@@ -20,7 +20,7 @@ int register_signal_handling(int signum) {
     struct sigaction new_action;
     memset(&new_action, 0, sizeof(new_action));
     if (signum == SIGINT) {
-        new_action.sa_sigaction = terminate_signal_handler;
+        new_action.sa_handler = terminate_signal_handler;
         new_action.sa_flags = SA_RESTART; //Deal with EINTER
     } else if (signum == SIGCHLD) {
         new_action.sa_sigaction = NULL;
