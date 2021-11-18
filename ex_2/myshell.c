@@ -153,6 +153,7 @@ int process_arglist(int count, char **arglist) {
             pid_t pid = fork();
             check_fork(pid);
             if (pid == 0) {
+                register_signal_handling(SIGINT);
                 if (execvp(arglist[0], arglist) == -1) {
                     fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                     exit(1);
