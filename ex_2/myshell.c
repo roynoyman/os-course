@@ -20,13 +20,15 @@ int register_signal_handling(int signum) {
     struct sigaction new_action;
     memset(&new_action, 0, sizeof(new_action));
     if (signum == SIGINT) {
-        printf("we are building sigint sig handler");
+        printf("we are building sigint sig handler\n");
         new_action.sa_handler = terminate_signal_handler;
         new_action.sa_flags = SA_RESTART; //Deal with EINTER
     } else if (signum == SIGCHLD) {
+        printf("we are building SIGCHLD sig handler\n");
         new_action.sa_sigaction = NULL;
         new_action.sa_flags = SA_NOCLDWAIT; //Do no transform children into zombies
     } else if (signum == 5) { //reset to default for pipe and redirect
+        printf("we are building DEFAULT sig handler\n");
         new_action.sa_handler = SIG_DFL;
         new_action.sa_flags = SA_RESTART; //Deal with EINTER
     }
