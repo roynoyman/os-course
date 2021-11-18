@@ -156,7 +156,7 @@ int process_arglist(int count, char **arglist) {
         if (special_character_index == count - 1) { // means '&'
             printf("we are in &\n");
             pid_t pid = fork();
-            printf("pid in parent is: %d\n");
+            printf("pid in parent is: %d\n", pid);
             check_fork(pid);
             if (pid == 0) {
                 printf("forked process in a &: %d%s%d", getpid(), "parent", getppid());
