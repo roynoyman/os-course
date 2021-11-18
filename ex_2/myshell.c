@@ -21,7 +21,7 @@ int register_signal_handling(int signum) {
     memset(&new_action, 0, sizeof(new_action));
     if (signum == SIGINT) {
         printf("we are building sigint sig handler\n");
-        new_action.sa_handler = terminate_signal_handler;
+        new_action.sa_handler = SIG_IGN;
         new_action.sa_flags = SA_RESTART; //Deal with EINTER
     } else if (signum == SIGCHLD) {
         printf("we are building SIGCHLD sig handler\n");
@@ -31,6 +31,7 @@ int register_signal_handling(int signum) {
         printf("we are building DEFAULT sig handler\n");
         new_action.sa_handler = SIG_DFL;
         new_action.sa_flags = SA_RESTART; //Deal with EINTER
+        signum = SIGINT;
     }
     if (sigaction(signum, &new_action, NULL) == -1) {
         fprintf(stderr, "ERROR: SIGNAL HANDLER FAILURE : %s", strerror(errno));
