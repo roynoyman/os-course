@@ -15,6 +15,14 @@
 void terminate_signal_handler() {
     printf("handling termination signal\n");
 }
+int register_signal_def(){ //reset to default for pipe and redirect
+    struct sigaction new_action;
+    printf("we are building DEFAULT sig handler\n");
+    new_action.sa_handler = SIG_DFL;
+    new_action.sa_flags = SA_RESTART; //Deal with EINTER
+    return sigaction(SIG_DFL, &new_action, NULL);
+}
+
 
 int register_signal_handling(int signum) {
     struct sigaction new_action;
@@ -27,17 +35,14 @@ int register_signal_handling(int signum) {
         printf("we are building SIGCHLD sig handler\n");
         new_action.sa_sigaction = NULL;
         new_action.sa_flags = SA_NOCLDWAIT; //Do no transform children into zombies
-    } else if (signum == 5) { //reset to default for pipe and redirect
-        printf("we are building DEFAULT sig handler\n");
-        new_action.sa_handler = SIG_DFL;
-        new_action.sa_flags = SA_RESTART; //Deal with EINTER
+        if (sigaction(signum, &new_action, NULL) == -1) {
+            fprintf(stderr, "ERROR: SIGNAL HANDLER FAILURE : %s", strerror(errno));
+            exit(1);
+        }
+        return sigaction(signum, &new_action, NULL);
     }
-    if (sigaction(signum, &new_action, NULL) == -1) {
-        fprintf(stderr, "ERROR: SIGNAL HANDLER FAILURE : %s", strerror(errno));
-        exit(1);
-    }
-    return sigaction(signum, &new_action, NULL);
 }
+
 
 void check_fork(pid_t pid) { //check for error in forks at process_arglist
     if (pid < 0) {
@@ -82,7 +87,7 @@ int exec_with_pipe(char **arglist, int index) {
     pid_t pid_1 = fork();
     check_fork(pid_1);
     if (pid_1 == 0) {
-        register_signal_handling(5);
+        register_signal_def();
         close(readerfd);
         if ((dup2(writerfd, STDOUT_FILENO) == -1) || (errno == EINTR)) {
             fprintf(stderr, "ERROR: DUP2 OF PID_1 FAILURE: %s", strerror(errno));
@@ -96,7 +101,7 @@ int exec_with_pipe(char **arglist, int index) {
     pid_t pid_2 = fork();
     check_fork(pid_2);
     if (pid_2 == 0) {
-        register_signal_handling(5);
+        register_signal_def();
         close(writerfd);
         if ((dup2(readerfd, STDIN_FILENO) == -1) || (errno == EINTR)) {
             fprintf(stderr, "ERROR: DUP2 OF PID_2: %s", strerror(errno));
@@ -142,7 +147,7 @@ int process_arglist(int count, char **arglist) {
         pid_t pid = fork();
         check_fork(pid);
         if (pid == 0) {
-            register_signal_handling(5);
+            register_signal_def();
             if (execvp(arglist[0], arglist) == -1) {
                 fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                 exit(1);
