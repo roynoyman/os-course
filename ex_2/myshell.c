@@ -13,17 +13,16 @@
 //
 // reference - rec3
 void terminate_signal_handler(int signum) {
-    printf("handling termination signal\n");
+    //    handling termination signal
 }
 
 int register_signal_handling(int signum) {
     struct sigaction new_action;
     memset(&new_action, 0, sizeof(new_action));
-    if (signum == SIGINT) {
-        printf("we are building sigint sig handler\n");
+    if (signum == SIGINT) { //handling SIGINT
         new_action.sa_handler = SIG_IGN;
         new_action.sa_flags = SA_RESTART; //Deal with EINTER
-    } else if (signum == SIGCHLD) {
+    } else if (signum == SIGCHLD) { //handling SIGCHLD
         printf("we are building SIGCHLD sig handler\n");
         new_action.sa_sigaction = NULL;
         new_action.sa_flags = SA_NOCLDWAIT; //Do no transform children into zombies
@@ -161,8 +160,6 @@ int process_arglist(int count, char **arglist) {
                     fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                     exit(1);
                 }
-            } else {
-                printf("parent process in a &: %d\n", getpid());
             }
         } else if (special_char == '\0') { //means '|'
             exec_with_pipe(arglist, special_character_index);
