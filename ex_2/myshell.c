@@ -167,7 +167,6 @@ int process_arglist(int count, char **arglist) {
                 }
             } else if (pid < 0) {
                 printf("parent process in a &: %d\n", getpid());
-                register_signal_handling(SIGINT);
             }
         } else if (special_char == '\0') { //means '|'
             exec_with_pipe(arglist, special_character_index);
