@@ -23,7 +23,6 @@ int register_signal_handling(int signum) {
         printf("we are building sigint sig handler\n");
         new_action.sa_handler = terminate_signal_handler;
         new_action.sa_flags = SA_RESTART; //Deal with EINTER
-        return sigaction(SIGINT, &new_action, NULL);
     } else if (signum == SIGCHLD) {
         printf("we are building SIGCHLD sig handler\n");
         new_action.sa_sigaction = NULL;
@@ -156,9 +155,9 @@ int process_arglist(int count, char **arglist) {
         if (special_character_index == count - 1) { // means '&'
             pid_t pid = fork();
             check_fork(pid);
+            register_signal_handling(SIGINT);
             if (pid == 0) {
                 printf("forked process in a &  %d %s %d", getpid(), "parent", getppid());
-//                register_signal_handling(SIGINT);
                 if (execvp(arglist[0], arglist) == -1) {
                     fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                     exit(1);
