@@ -31,12 +31,12 @@ int register_signal_handling(int signum) {
         printf("we are building DEFAULT sig handler\n");
         new_action.sa_handler = SIG_DFL;
         new_action.sa_flags = SA_RESTART; //Deal with EINTER
-        signum = SIGINT; //5 was just my indicator for default
+        return sigaction(SIGINT, &new_action, NULL);
     }
-    if (sigaction(signum, &new_action, NULL) == -1) {
-        fprintf(stderr, "ERROR: SIGNAL HANDLER FAILURE : %s", strerror(errno));
-        exit(1);
-    }
+//    if (sigaction(signum, &new_action, NULL) == -1) {
+//        fprintf(stderr, "ERROR: SIGNAL HANDLER FAILURE : %s", strerror(errno));
+//        exit(1);
+//    }
     return sigaction(signum, &new_action, NULL);
 }
 
