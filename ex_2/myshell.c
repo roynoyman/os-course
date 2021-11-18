@@ -155,14 +155,14 @@ int process_arglist(int count, char **arglist) {
         if (special_character_index == count - 1) { // means '&'
             pid_t pid = fork();
             check_fork(pid);
-            register_signal_handling(SIGINT);
             if (pid == 0) {
                 printf("forked process in a &  %d %s %d", getpid(), "parent", getppid());
                 if (execvp(arglist[0], arglist) == -1) {
                     fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                     exit(1);
                 }
-            } else if (pid < 0) {
+            } else {
+                register_signal_handling(SIGINT);
                 printf("parent process in a &: %d\n", getpid());
             }
         } else if (special_char == '\0') { //means '|'
