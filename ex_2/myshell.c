@@ -12,10 +12,6 @@
 // Created by Roy Noyman on 11/11/2021.
 //
 // reference - rec3
-void terminate_signal_handler(int signum) {
-    //    handling termination signal
-}
-
 int register_signal_handling(int signum) {
     struct sigaction new_action;
     memset(&new_action, 0, sizeof(new_action));
@@ -23,11 +19,9 @@ int register_signal_handling(int signum) {
         new_action.sa_handler = SIG_IGN;
         new_action.sa_flags = SA_RESTART; //Deal with EINTER
     } else if (signum == SIGCHLD) { //handling SIGCHLD
-        printf("we are building SIGCHLD sig handler\n");
         new_action.sa_sigaction = NULL;
         new_action.sa_flags = SA_NOCLDWAIT; //Do no transform children into zombies
     } else if (signum == 5) { //reset to default for pipe and redirect
-        printf("we are building DEFAULT sig handler\n");
         new_action.sa_handler = SIG_DFL;
         new_action.sa_flags = SA_RESTART; //Deal with EINTER
         signum = SIGINT;
@@ -39,7 +33,7 @@ int register_signal_handling(int signum) {
     return sigaction(signum, &new_action, NULL);
 }
 
-void check_fork(pid_t pid) { //check for error in forks at process_arglist
+void check_fork(pid_t pid) { //check for errors in all forks at process_arglist
     if (pid < 0) {
         fprintf(stderr, "ERROR: FORK FAILURE: %s", strerror(errno));
         exit(0);
@@ -47,16 +41,16 @@ void check_fork(pid_t pid) { //check for error in forks at process_arglist
 }
 
 int prepare(void) {
-    register_signal_handling(SIGINT);
-    register_signal_handling(SIGCHLD);
+    register_signal_handling(SIGINT); //Handling SIGINT
+    register_signal_handling(SIGCHLD); //Handling SIGCHLD
     return 0;
 }
 
-int contains_special_character_at_index(int count, char **arglist) {
+int contains_special_character_at_index(int count, char **arglist) { //Found the special character in the input
     int i;
     for (i = 0; i < count - 1; i++) {
         if (strcmp(arglist[i], "|") == 0) {
-            arglist[i] = NULL; // to detrmain between | and >
+            arglist[i] = NULL; // to determine between | and >
             return i;
         } else if (strcmp(arglist[i], ">") == 0) {
             return i;
@@ -109,8 +103,8 @@ int exec_with_pipe(char **arglist, int index) {
     }
     close(readerfd);
     close(writerfd);
-    waitpid(pid_1, NULL, WUNTRACED);
-    waitpid(pid_2, NULL, WUNTRACED);
+    waitpid(pid_1, NULL, WUNTRACED); //Notify about stoped untraced child
+    waitpid(pid_2, NULL, WUNTRACED); //Notify about stoped untraced child
     return 1;
 }
 
@@ -120,7 +114,7 @@ int exec_with_redirecting(char **arglist, int index) {
     pid_t pid = fork();
     check_fork(pid);
     if (pid == 0) { //child
-        register_signal_handling(5);
+        register_signal_handling(5); //SIG_DFL of child.
         if ((dup2(fd, STDOUT_FILENO) == -1) || (errno == EINTR)) {
             fprintf(stderr, "ERROR: DUP2 OF FD: %s", strerror(errno));
             exit(1);
@@ -156,7 +150,6 @@ int process_arglist(int count, char **arglist) {
             pid_t pid = fork();
             check_fork(pid);
             if (pid == 0) {
-                printf("forked process in a &  %d %s %d", getpid(), "parent", getppid());
                 if (execvp(arglist[0], arglist) == -1) {
                     fprintf(stderr, "ERROR: EXECVP FAILURE: %s", strerror(errno));
                     exit(1);
