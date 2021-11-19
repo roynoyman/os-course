@@ -120,6 +120,7 @@ int exec_with_redirecting(char **arglist, int index) {
     pid_t pid = fork();
     check_fork(pid);
     if (pid == 0) { //child
+        register_signal_handling(5);
         if ((dup2(fd, STDOUT_FILENO) == -1) || (errno == EINTR)) {
             fprintf(stderr, "ERROR: DUP2 OF FD: %s", strerror(errno));
             exit(1);
