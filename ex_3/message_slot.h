@@ -1,0 +1,10 @@
+//
+// Created by Roy Noyman on 02/12/2021.
+//
+
+#ifndef UNTITLED_MESSAGE_SLOT_H
+#define UNTITLED_MESSAGE_SLOT_H
+
+#endif //UNTITLED_MESSAGE_SLOT_H
+#define MAJOR_NUMBER 240
+#define BUFFER_LENGTH 128
