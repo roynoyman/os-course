@@ -1,14 +1,16 @@
 //
 // Created by Roy Noyman on 02/12/2021.
 //
-#include "message_slot.h"
 #include <printf.h>
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include "message_slot.h"
+
 
 int main(int argc, char *argv[]) {
     if (argc != 4) {

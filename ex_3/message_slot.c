@@ -17,6 +17,7 @@
 #include <linux/ioctl.h>
 #include <stddef.h>
 #include <sys/unistd.h>
+#include <stdio.h>
 #include "message_slot.h"
 #include <linux/module.h>
 
