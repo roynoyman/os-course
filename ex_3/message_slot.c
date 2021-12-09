@@ -6,28 +6,25 @@
 #undef MODULE
 #define MODULE
 
-#include <linux/ioctl.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
-#include <linux/module.h>
-#include <linux/kdev_t.h>
-#include <linux/fs.h>
-#include <linux/cdev.h>
-#include <linux/device.h>
-#include <linux/slab.h>
-#include <linux/uaccess.h>
 #include <linux/ioctl.h>
+#include <linux/module.h>
+#include <linux/device.h>
+#include <linux/kdev_t.h>
+#include <linux/slab.h>
+#include <linux/fs.h>
+#include <linux/uaccess.h>
+#include <linux/cdev.h>
 #include <linux/unistd.h>
 #include "message_slot.h"
-#include <linux/module.h>
-
 
 MODULE_LICENSE("GPL");
 
-typedef struct data {
+typedef struct data_device {
     unsigned long channel_num;
     unsigned int minor;
-} data;
+} data_device;
 
 typedef struct msg {
     unsigned char buffer[BUFFER_LENGTH];
@@ -36,23 +33,29 @@ typedef struct msg {
 
 typedef struct channel_node {
     long channel_id;
-    int msg_size;
     msg *message;
     struct channel_node *next;
 } channel_node;
 
-static channel_node channel_minors[MAX_MINORS];
+static channel_node channel_minors[MAX_MINORS]; //data structure (I chose linked list) to describe indiviaul message slots.
 
+unsigned int get_device_minor(struct file *file){
+    return ((data_device *) (file->private_data))->minor;
+}
+
+unsigned long get_device_channel_num(struct file *file){
+    return ((data_device *) (file->private_data))->channel_num;
+}
 //================== DEVICE FUNCTIONS ===========================
 static int device_open(struct inode *inode, struct file *file) {
-    data *open_file_path;
-    open_file_path = kmalloc(sizeof(data), GFP_KERNEL);
+    data_device *open_file_path;
+    open_file_path = kmalloc(sizeof(data_device), GFP_KERNEL);
     if (open_file_path == NULL) {
         return 1;
     }
     file->private_data = (void *) open_file_path;
-    ((data *) (file->private_data))->channel_num = 0;
-    ((data *) (file->private_data))->minor = iminor(inode);
+    ((data_device *) (file->private_data))->channel_num = 0;
+    ((data_device *) (file->private_data))->minor = iminor(inode);
     printk("open is not broken \n");
     return 0;
 }
@@ -61,8 +64,7 @@ static long device_ioctl(struct file *file, unsigned int ioctl_command_id, unsig
     if (ioctl_command_id != MSG_SLOT_CHANNEL || ioctl_param == 0) {
         return -EINVAL;
     }
-    printk("ioctl is not broken");
-    ((data *) (file->private_data))->channel_num = ioctl_param;
+    ((data_device *) (file->private_data))->channel_num = ioctl_param;
     return 0;
 }
 //---------------------------------------------------------------
@@ -70,14 +72,14 @@ static ssize_t device_read(struct file *file, char __user *buf, size_t length, l
     struct channel_node *curr;
     int check;
     size_t msg_len;
-    if (((data *) (file->private_data))->channel_num == 0 || buf == NULL) {
+    if (get_device_channel_num(file) == 0 || buf == NULL) {
         return -EINVAL;
     }
-    curr = &channel_minors[((data *) (file->private_data))->minor];
-    while (curr->next != NULL && curr->channel_id != ((data *) (file->private_data))->channel_num) {
+    curr = &channel_minors[get_device_minor(file)];
+    while (curr->next != NULL && curr->channel_id != get_device_channel_num(file)) { //search over the linked list
         curr = (curr->next);
     }
-    if (curr->channel_id != ((data *) (file->private_data))->channel_num || curr->message == NULL) {
+    if (curr->channel_id != get_device_channel_num(file) || curr->message == NULL) {
         return -EWOULDBLOCK;
     }
     if (length < (curr->message)->len) {
@@ -92,7 +94,7 @@ static ssize_t device_read(struct file *file, char __user *buf, size_t length, l
         return msg_len;
     } else {
         curr->message->len = 0;
-        return 0;
+        return -1;
     }
 }
 //---------------------------------------------------------------
@@ -102,20 +104,20 @@ static ssize_t device_write(struct file *file, const char __user *buf, size_t le
     if (length < 1 || length > BUFFER_LENGTH) {
         return -EMSGSIZE;
     }
-    if (((data *) (file->private_data))->channel_num == 0 || buf == NULL) {
+    if (get_device_channel_num(file)== 0 || buf == NULL) {
         return -EINVAL;
     }
-    curr = &(channel_minors[((data *) (file->private_data))->minor]);
-    while (curr->next != NULL && curr->channel_id != ((data *) (file->private_data))->channel_num) {
+    curr = &(channel_minors[get_device_minor(file)]);
+    while (curr->next != NULL && curr->channel_id != get_device_channel_num(file)) { //search over the linked list
         curr = (curr->next);
     }
-    if (curr->channel_id != ((data *) (file->private_data))->channel_num) {
+    if (curr->channel_id != get_device_channel_num(file)) {
         curr->next = kcalloc(1, sizeof(struct channel_node), GFP_KERNEL);
         if (curr->next == NULL) {
             return -1;
         }
         curr = curr->next;
-        curr->channel_id = ((data *) (file->private_data))->channel_num;
+        curr->channel_id =  get_device_channel_num(file);
     }
     if (curr->message != NULL) {
         kfree(curr->message);
@@ -130,12 +132,12 @@ static ssize_t device_write(struct file *file, const char __user *buf, size_t le
         return length;
     } else {
         curr->message->len = 0;
-        return 0;
+        return -1;
     }
 }
 //---------------------------------------------------------------
 static int device_release(struct inode *inode, struct file *file){
-    data *release_file = (data *)(file->private_data);
+    data_device *release_file = (data_device *)(file->private_data);
     kfree(release_file);
     return 0;
 }
@@ -154,7 +156,7 @@ static int __init device_init(void){
     int major_num;
     major_num = register_chrdev(MAJOR_NUMBER, MY_CHAR_DEV ,&Fops);
     if(major_num < 0){
-        printk(KERN_ERR "Device_init failed %d\n", MAJOR_NUMBER);
+        printk(KERN_ERR "DEVICE_INIT FAILED %d\n", MAJOR_NUMBER);
         return major_num;
     }
     return 0;
@@ -165,8 +167,8 @@ static void __exit device_cleanup(void){
     struct channel_node *next;
     int i;
     for(i=0; i<MAX_MINORS; i++){
-        if(&channel_minors[i] != NULL){
-            curr = channel_minors[i].next;
+        curr = (&channel_minors[i])->next; //Head of linked list
+        if(curr != NULL){
             next = curr->next;
             while(next!=NULL){
                 if(curr->message != NULL){
@@ -176,6 +178,7 @@ static void __exit device_cleanup(void){
                 curr = next;
                 next = curr->next;
             }
+            // last curr is not null
             if(curr->message != NULL){
                 kfree(curr->message);
             }
