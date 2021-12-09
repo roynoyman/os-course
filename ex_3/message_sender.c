@@ -1,6 +1,3 @@
-//
-// Created by Roy Noyman on 02/12/2021.
-//
 #include <linux/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
